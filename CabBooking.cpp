@@ -120,9 +120,18 @@ public:
 			return ;
 		}
 		Trip* trip=trips[tripId];
-		trip->getDriver()->setAvailable(true);
-		trip->setTripStatus(TripStatus::CANCELLED);
-		cout<<"!!! Trip CANCELLED"<<endl;
+		if(trip->getStatus()==TripStatus::COMPLETED){
+			cout<<"Trip already completed"<<endl;
+			return ;
+		} 
+		if(trip->getStatus()==TripStatus::PENDING || (trip->getStatus()==TripStatus::ONGOING))
+		{
+			trip->getDriver()->setAvailable(true);
+			trip->setTripStatus(TripStatus::CANCELLED);
+			cout<<"!!! Trip CANCELLED"<<endl;
+			return ;
+		}
+		cout<<"Trip Already CANCELLED"<<endl;
 	}
 
 	void completeTrip(int tripId){
@@ -131,8 +140,11 @@ public:
 			return ;
 		}
 		Trip* trip=trips[tripId];
-		trip->getDriver()->setAvailable(true);
-		trip->setTripStatus(TripStatus::COMPLETED);
+		if(trip->getStatus()==TripStatus::ONGOING)
+		{
+			trip->getDriver()->setAvailable(true);
+			trip->setTripStatus(TripStatus::COMPLETED);
+		}
 	}
 
 	void printTrip(int tripId) {
@@ -158,18 +170,22 @@ public:
 		return NULL;
 	}
 
-	string statusToString(TripStatus status) {
-	switch(status) {
-		case COMPLETED: return "COMPLETED";
-		case PENDING: return "PENDING";
-		case ONGOING: return "ONGOING";
-		case CANCELLED: return "CANCELLED";
-		default: return "UNKNOWN";
+	string statusToString(TripStatus status) 
+	{
+		switch(status) {
+			case COMPLETED: return "COMPLETED";
+			case PENDING: return "PENDING";
+			case ONGOING: return "ONGOING";
+			case CANCELLED: return "CANCELLED";
+			default: return "UNKNOWN";
+		}
 	}
-}
 
-
-
+	~RidingApp() {
+		for (auto& it : users) delete it.second;
+		for (auto& it : drivers) delete it.second;
+		for (auto& it : trips) delete it.second;
+	}
 };
 
 
@@ -182,4 +198,6 @@ int main(){
 	app.bookTrip(1, "A", "B");
 	app.completeTrip(0);
 	app.printTrip(0);
+	app.cancelTrip(0);
+	app.cancelTrip(0);
 }
